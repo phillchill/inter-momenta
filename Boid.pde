@@ -253,7 +253,7 @@ class Boid {
   
   void gaze() {
     // For every neighbour, draw line
-    float lifeline = map(leftToLive, 0, lifespan, 20, 255);
+    float lifeline = map(leftToLive, 0, lifespan, 1, 255);
     stroke(255,255,255,lifeline);
     
     Iterator<Boid> it = nbs.iterator();
