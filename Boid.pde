@@ -10,8 +10,6 @@ float awt;
 float maxspeed = 1;
 float maxforce = 0.025;
 
-
-
 class Boid {
   PVector location;
   PVector velocity;
@@ -20,8 +18,7 @@ class Boid {
   float r;
   
   float hoverRad;
-  boolean hovered = false;
-  boolean dragging = false; 
+  boolean dragging = false;
   
   int lifespan;
   int leftToLive;
@@ -31,6 +28,7 @@ class Boid {
   ArrayList<Boid> nbs;
   
   String word;
+  float txtSize;
   
   float radialEasing = 0.03;
   float reactionRadial = 0;
@@ -56,6 +54,7 @@ class Boid {
     birth = millis();
     
     word = token;
+    txtSize = 20 + random(-10, 10);
     
     // connect 2 neighbours
     connect2Neighbours(peers);
@@ -172,6 +171,8 @@ class Boid {
   void run(ArrayList<Boid> boids) {
     flock(boids);
     update();
+    // pull();
+    mouse();
     borders();
     display();
   }
@@ -180,7 +181,7 @@ class Boid {
     PVector sep = separate(boids);   // Separation
     PVector ali = align(boids);      // Alignment
     PVector coh = cohesion(boids);   // Cohesion
-    // Arbitrarily weight these forces
+    // weight these forces
     
     sep.mult(swt);
     ali.mult(awt);
@@ -193,26 +194,30 @@ class Boid {
 
   // Method to update location
   void update() {
-    if(!dragging){
-      // Update velocity
-      velocity.add(acceleration);
-      // Limit speed
-      velocity.limit(maxspeed);
-      location.add(velocity);
-      // Reset accelertion to 0 each cycle
-      acceleration.mult(0);  
-    }
-    else {
+    
+    // move
+    // Update velocity
+    velocity.add(acceleration);
+    // Limit speed
+    velocity.limit(maxspeed);
+    location.add(velocity);
+    // Reset accelertion to 0 each cycle
+    acceleration.mult(0);
+    
+    // decay life
+    leftToLive = lifespan - (millis() - birth);
+  }
+  
+  void mouse() {
+    if(dragging){
       location.x = mouseX;
       location.y = mouseY;
     }
-    
-    
-    leftToLive = lifespan - (millis() - birth);
   }
 
   void display() {
-    // appear
+    /// appear on creation
+    // radial touch
     float dRadial = reactionRadialMax - reactionRadial;
     if(dRadial != 0){
       noStroke();
@@ -221,6 +226,7 @@ class Boid {
       ellipse(location.x, location.y, reactionRadial, reactionRadial);
     }
     
+    // grow text from point of origin
     float dText = textSizeMax - textSize;
     if(dText != 0){
       noStroke();
@@ -237,18 +243,22 @@ class Boid {
     popMatrix();
     noFill();    
     
+    // draw text 
+    textSize(txtSize);
+    float lifeline = map(leftToLive, 0, lifespan, 25, 255);
+    if(mouseOver()){
+      stroke(229,28,35);
+      fill(229,28,35);
+    }
+    else {
+      stroke(255);
+      fill(255);
+    }
+    
+    text(word, location.x, location.y);
+    
     // draw connections to neighboars
     gaze();
-    
-    // draw text
-    // textSize(20);
-    
-    float lifeline = map(leftToLive, 0, lifespan, 25, 255);
-    stroke(255);
-//    line(location.x, location.y, location.x+lifeline, location.y);
-//    fill(255, 255, 255, lifeline);
-    fill(255, 255, 255);
-    text(word, location.x, location.y);
   }
   
   void gaze() {
@@ -273,14 +283,7 @@ class Boid {
     float mouseDist = PVector.dist(location, new PVector(mouseX,mouseY));
     if(mouseDist < gazeRad) {
 //      ellipse(location.x, location.y, 2*gazeRad, 2*gazeRad);
-    }
-    if(mouseDist < hoverRad) {
-      hovered = true;
-    }
-    else {
-      hovered = false;
-    }
-    
+    }    
   }
 
   
@@ -301,6 +304,10 @@ class Boid {
         velocity.y *= -1;
       }
     }
+  }
+  
+  void togglePause () {
+    paused = !paused;
   }
   
   boolean isDead(){

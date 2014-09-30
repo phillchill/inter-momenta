@@ -20,7 +20,7 @@ void setup() {
   
   synth = new AudioGenerator();
   cursor = new Cursor();
-  corpus = new Corpus("article.txt", "filtertokens.txt");
+  corpus = new Corpus("data/article.txt", "data/filtertokens.txt");
   
   String line = corpus.getLine(corpus.lines);
 
@@ -37,6 +37,18 @@ void draw() {
   cursor.draw();
   flock.run();
   drawScrollbars();
+}
+
+void newMomentum(){
+  int num = int(random(3, 7));
+  for (int i = 0; i < num; i++) {    
+    flock.addBoid(new Boid(width/2+random(-10, 10),height/2+random(-10, 10), flock.boids, corpus.newToken()));
+  }
+}
+
+
+void togglePause () {
+  flock.togglePause();
 }
 
 void clear () {
@@ -57,22 +69,28 @@ void mouseReleased(){
 
 void keyPressed() {  
   if (keyCode == ENTER || keyCode == RETURN) {
-    
-  }
-  else if (keyCode == ' ') {
     if(flock.boids.size() > 0){
       clear();
     }
     else {
-      int num = int(random(3, 7));
-      String line = corpus.getLine(corpus.lines);
-      for (int i = 0; i < num; i++) {    
-        flock.addBoid(new Boid(width/2+random(-10, 10),height/2+random(-10, 10), flock.boids, corpus.getToken(line)));
-      }
+      newMomentum();
     }
   }
+  else if (keyCode == ' ') {
+    togglePause();
+  }
   else if (keyCode == 'S'){
-    println("S");
+    // scrollbar settings
     showScroll = !showScroll;
+  }
+  else if (keyCode == 'N'){
+    newMomentum();
+  }
+  else if (keyCode == 'D'){
+    // demo
+    String[] tokens = {"coniunctus","inter","momenta"};
+    for (int i = 0; i < tokens.length; i++) {
+      flock.addBoid(new Boid(width/2+random(-10, 10),height/2+random(-10, 10), flock.boids, tokens[i]));
+    }
   }
 }

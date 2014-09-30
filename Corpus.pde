@@ -46,7 +46,7 @@ class Corpus {
     Iterator<String> it = tokens.iterator();
     while (it.hasNext()) {
       String token = it.next();
-      if (filterTokens.contains(token) || token.length() < 2 ){
+      if (filterTokens.contains(token.toLowerCase()) || token.length() < 2 ){
         it.remove();
       }
     }
