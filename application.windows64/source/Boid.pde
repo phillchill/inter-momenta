@@ -49,7 +49,7 @@ class Boid {
     gazeRad = 100;
     wrapAround = false;
     
-    lifespan = 60000;
+    lifespan = 160000;
     leftToLive = lifespan;
     birth = millis();
     
